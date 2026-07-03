@@ -373,13 +373,6 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Inter',-apple-syst
   <!-- Question Slides (2-20) -->
 </div>
 
-<!-- Nav Controls -->
-<div class="nav-controls" id="navControls">
-  <button class="nav-ctrl-btn" onclick="prevSlide()" id="prevBtn" title="上一页">‹</button>
-  <span class="page-label" id="pageLabel">1 / 23</span>
-  <button class="nav-ctrl-btn" onclick="nextSlide()" id="nextBtn" title="下一页">›</button>
-</div>
-
 <script>
 // === Supabase ===
 const SB_URL = 'https://quimaqprefgwonfefoqg.supabase.co/rest/v1';
@@ -1294,7 +1287,6 @@ function goToSlide(index){
     else s.classList.add('next');
   });
   
-  updateNavControls();
   rescale();
 }
 
@@ -1305,13 +1297,6 @@ function prevSlide(){
 function nextSlide(){
   const navSlides = getNavSlides();
   if(currentSlide < navSlides.length - 1) goToSlide(currentSlide + 1);
-}
-
-function updateNavControls(){
-  const navSlides = getNavSlides();
-  document.getElementById('prevBtn').disabled = currentSlide === 0;
-  document.getElementById('nextBtn').disabled = currentSlide >= navSlides.length - 1;
-  document.getElementById('pageLabel').textContent = (currentSlide + 1) + ' / ' + navSlides.length;
 }
 
 // === Responsive Scaling ===
@@ -1336,37 +1321,6 @@ function rescale(){
   slide.style.top = offsetY + 'px';
 }
 
-// === Keyboard Navigation ===
-document.addEventListener('keydown', e => {
-  if(e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' '){
-    e.preventDefault();
-    nextSlide();
-  } else if(e.key === 'ArrowLeft' || e.key === 'ArrowUp'){
-    e.preventDefault();
-    prevSlide();
-  }
-});
-
-// === Mouse Wheel ===
-let wheelTimeout;
-document.addEventListener('wheel', e => {
-  if(wheelTimeout) return;
-  wheelTimeout = setTimeout(() => { wheelTimeout = null; }, 800);
-  if(e.deltaY > 0) nextSlide();
-  else if(e.deltaY < 0) prevSlide();
-}, {passive: true});
-
-// === Touch Swipe ===
-let touchStartY = 0;
-document.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; });
-document.addEventListener('touchend', e => {
-  const dy = touchStartY - e.changedTouches[0].clientY;
-  if(Math.abs(dy) > 50){
-    if(dy > 0) nextSlide();
-    else prevSlide();
-  }
-});
-
 // === Init ===
 window.addEventListener('resize', rescale);
 window.addEventListener('load', () => {
@@ -1375,7 +1329,6 @@ window.addEventListener('load', () => {
   buildResultsSlide();
   buildAdminSlide();
   loadFromStorage();
-  updateNavControls();
   rescale();
 });
 </script>
