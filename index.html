@@ -958,56 +958,42 @@ function closeReport(){
 
 async function saveReportImage(){
   const inner = document.getElementById('reportInner');
-  const overlay = document.getElementById('reportOverlay');
   const html = inner.innerHTML;
   const w = 800;
 
-  const temp = document.createElement('div');
-  temp.style.cssText = 'position:absolute;left:-9999px;top:0;width:'+w+'px;visibility:hidden;font-family:"PingFang SC","Microsoft YaHei",sans-serif;color:#1e293b;';
-  temp.innerHTML = html;
-  document.body.appendChild(temp);
-  const h = temp.offsetHeight + 20;
-  document.body.removeChild(temp);
+  const fullHtml = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>评估报告</title>
+<style>body{margin:0;padding:0;background:#fff;font-family:'PingFang SC','Microsoft YaHei',sans-serif;color:#1e293b}.wrap{max-width:${w}px;margin:0 auto;padding:24px 20px 80px}
+.r-header{text-align:center;border-bottom:3px solid #00C896;padding-bottom:20px;margin-bottom:24px}
+.r-header h1{font-size:22px;font-weight:700;color:#0F1729;margin-bottom:6px}
+.r-badge{display:inline-block;background:#E6FAF4;color:#00C896;padding:3px 12px;border-radius:100px;font-size:12px;font-weight:600}
+.r-section{margin-bottom:22px}
+.r-section h2{font-size:15px;font-weight:700;color:#0F1729;border-left:4px solid #00C896;padding-left:10px;margin-bottom:12px}
+.r-info{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;font-size:13px}
+.r-label{color:#64748B}.r-value{color:#0F1729;font-weight:500}
+.r-score-hero{display:flex;align-items:center;gap:20px;background:#F8FAFC;border-radius:10px;padding:20px 24px;margin-bottom:14px}
+.r-big{font-size:48px;font-weight:700;color:#00C896;line-height:1}
+.r-meta{font-size:14px;color:#64748B}.r-meta strong{color:#0F1729}
+.r-level{display:inline-block;padding:3px 12px;border-radius:100px;font-size:13px;font-weight:700}
+.r-bars{display:flex;flex-wrap:wrap;gap:10px}
+.r-bar{flex:1;min-width:130px;background:#F8FAFC;border-radius:8px;padding:12px 14px}
+.r-bar-name{font-size:12px;font-weight:600;margin-bottom:4px}
+.r-bar-val{font-size:20px;font-weight:700;color:#0F1729}
+.r-bar-sub{font-size:12px;color:#64748B;font-weight:400}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#F8FAFC;padding:8px 10px;text-align:left;font-weight:600;color:#64748B;border-bottom:2px solid #E5E7EC}
+td{padding:7px 10px;border-bottom:1px solid #F1F5F9}
+tr:nth-child(even) td{background:#FAFAFA}
+.r-footer{text-align:center;margin-top:32px;padding-top:16px;border-top:1px solid #E5E7EC;font-size:11px;color:#94A3B8}
+.tip-banner{position:fixed;top:0;left:0;right:0;background:#00C896;color:#fff;text-align:center;padding:10px;font-size:14px;font-weight:600;z-index:10}
+.tip-banner a{color:#fff}</style></head><body>
+<div class="tip-banner">📸 请截屏或长按页面保存报告 &nbsp; <a href="javascript:history.back()">← 返回评估</a></div>
+<div class="wrap">${html}</div>
+</body></html>`;
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
-    <foreignObject width="100%" height="100%">
-      <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:'PingFang SC','Microsoft YaHei',sans-serif;color:#1e293b;padding:16px;width:${w}px;box-sizing:border-box">
-        ${html}
-      </div>
-    </foreignObject>
-  </svg>`;
-
-  const img = new Image();
-  const blob = new Blob([svg], {type:'image/svg+xml;charset=utf-8'});
+  const blob = new Blob([fullHtml], {type:'text/html;charset=utf-8'});
   const url = URL.createObjectURL(blob);
-
-  img.onload = function(){
-    const canvas = document.createElement('canvas');
-    canvas.width = w * 2;
-    canvas.height = h * 2;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.scale(2, 2);
-    ctx.drawImage(img, 0, 0);
-    URL.revokeObjectURL(url);
-
-    const dataUrl = canvas.toDataURL('image/png');
-    // Hide bottom action bar, show image for long-press save
-    document.querySelector('#reportOverlay .r-actions').style.display = 'none';
-    document.querySelector('#reportOverlay .r-tip').style.display = 'none';
-    inner.innerHTML = `<div style="text-align:center;margin-bottom:12px;font-size:13px;color:#64748B">👇 长按下方图片即可保存到相册</div>
-      <img src="${dataUrl}" style="width:100%;max-width:${w}px;display:block;margin:0 auto;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.1)" onerror="this.onerror=null;this.outerHTML='<p style=text-align:center;color:#EF4444>图片生成失败，请尝试截图保存</p>'">
-      <div style="text-align:center;margin-top:16px">
-        <button class="r-btn r-btn-close" onclick="closeReport()">✕ 关闭</button>
-      </div>`;
-    // Also trigger download as backup
-    const a = document.createElement('a');
-    a.href = dataUrl;
-    a.download = '智能制造评估报告.png';
-    a.click();
-  };
-  img.src = url;
+  document.getElementById('reportOverlay').classList.remove('show');
+  window.location.href = url;
 }
 
 function downloadReport(){
