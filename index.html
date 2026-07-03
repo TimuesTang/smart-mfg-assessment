@@ -952,13 +952,16 @@ function loadFromStorage(){
 
 function closeReport(){
   document.getElementById('reportOverlay').classList.remove('show');
+  document.querySelector('#reportOverlay .r-actions').style.display = 'flex';
+  document.querySelector('#reportOverlay .r-tip').style.display = '';
 }
 
 async function saveReportImage(){
   const inner = document.getElementById('reportInner');
+  const overlay = document.getElementById('reportOverlay');
   const html = inner.innerHTML;
   const w = 800;
-  // Get actual height
+
   const temp = document.createElement('div');
   temp.style.cssText = 'position:absolute;left:-9999px;top:0;width:'+w+'px;visibility:hidden;font-family:"PingFang SC","Microsoft YaHei",sans-serif;color:#1e293b;';
   temp.innerHTML = html;
@@ -977,7 +980,7 @@ async function saveReportImage(){
   const img = new Image();
   const blob = new Blob([svg], {type:'image/svg+xml;charset=utf-8'});
   const url = URL.createObjectURL(blob);
-  
+
   img.onload = function(){
     const canvas = document.createElement('canvas');
     canvas.width = w * 2;
@@ -988,21 +991,21 @@ async function saveReportImage(){
     ctx.scale(2, 2);
     ctx.drawImage(img, 0, 0);
     URL.revokeObjectURL(url);
-    
+
     const dataUrl = canvas.toDataURL('image/png');
+    // Hide bottom action bar, show image for long-press save
+    document.querySelector('#reportOverlay .r-actions').style.display = 'none';
+    document.querySelector('#reportOverlay .r-tip').style.display = 'none';
+    inner.innerHTML = `<div style="text-align:center;margin-bottom:12px;font-size:13px;color:#64748B">👇 长按下方图片即可保存到相册</div>
+      <img src="${dataUrl}" style="width:100%;max-width:${w}px;display:block;margin:0 auto;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.1)" onerror="this.onerror=null;this.outerHTML='<p style=text-align:center;color:#EF4444>图片生成失败，请尝试截图保存</p>'">
+      <div style="text-align:center;margin-top:16px">
+        <button class="r-btn r-btn-close" onclick="closeReport()">✕ 关闭</button>
+      </div>`;
+    // Also trigger download as backup
     const a = document.createElement('a');
     a.href = dataUrl;
     a.download = '智能制造评估报告.png';
     a.click();
-    
-    // Fallback: open image in new tab for mobile in-app browsers
-    setTimeout(() => {
-      const win = window.open('', '_blank');
-      if(win){
-        win.document.write(`<img src="${dataUrl}" style="max-width:100%;height:auto" onload="document.title='评估报告'">`);
-        win.document.close();
-      }
-    }, 100);
   };
   img.src = url;
 }
