@@ -659,7 +659,7 @@ function buildResultsSlide(){
           <div class="c-divider"></div>
           <div class="review-summary">本次评估已提交完成，以下结果已锁定。如需重新评估，请联系系统管理员。</div>
           <div class="review-btns">
-            <button class="cta-btn" onclick="downloadReport()" style="background:#0EA5E9;box-shadow:0 4px 12px rgba(14,165,233,0.3)">📄 导出 PDF 报告</button>
+            <button class="cta-btn" onclick="downloadReport()" style="background:#0EA5E9;box-shadow:0 4px 12px rgba(14,165,233,0.3)">📄 查看评估报告</button>
             <button class="cta-btn outline" onclick="goToSlide(0)">返回首页</button>
           </div>
         </div>
@@ -952,48 +952,11 @@ function loadFromStorage(){
 
 function closeReport(){
   document.getElementById('reportOverlay').classList.remove('show');
-  document.querySelector('#reportOverlay .r-actions').style.display = 'flex';
-  document.querySelector('#reportOverlay .r-tip').style.display = '';
 }
 
-async function saveReportImage(){
-  const inner = document.getElementById('reportInner');
-  const html = inner.innerHTML;
-  const w = 800;
-
-  const fullHtml = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>评估报告</title>
-<style>body{margin:0;padding:0;background:#fff;font-family:'PingFang SC','Microsoft YaHei',sans-serif;color:#1e293b}.wrap{max-width:${w}px;margin:0 auto;padding:24px 20px 80px}
-.r-header{text-align:center;border-bottom:3px solid #00C896;padding-bottom:20px;margin-bottom:24px}
-.r-header h1{font-size:22px;font-weight:700;color:#0F1729;margin-bottom:6px}
-.r-badge{display:inline-block;background:#E6FAF4;color:#00C896;padding:3px 12px;border-radius:100px;font-size:12px;font-weight:600}
-.r-section{margin-bottom:22px}
-.r-section h2{font-size:15px;font-weight:700;color:#0F1729;border-left:4px solid #00C896;padding-left:10px;margin-bottom:12px}
-.r-info{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;font-size:13px}
-.r-label{color:#64748B}.r-value{color:#0F1729;font-weight:500}
-.r-score-hero{display:flex;align-items:center;gap:20px;background:#F8FAFC;border-radius:10px;padding:20px 24px;margin-bottom:14px}
-.r-big{font-size:48px;font-weight:700;color:#00C896;line-height:1}
-.r-meta{font-size:14px;color:#64748B}.r-meta strong{color:#0F1729}
-.r-level{display:inline-block;padding:3px 12px;border-radius:100px;font-size:13px;font-weight:700}
-.r-bars{display:flex;flex-wrap:wrap;gap:10px}
-.r-bar{flex:1;min-width:130px;background:#F8FAFC;border-radius:8px;padding:12px 14px}
-.r-bar-name{font-size:12px;font-weight:600;margin-bottom:4px}
-.r-bar-val{font-size:20px;font-weight:700;color:#0F1729}
-.r-bar-sub{font-size:12px;color:#64748B;font-weight:400}
-table{width:100%;border-collapse:collapse;font-size:12px}
-th{background:#F8FAFC;padding:8px 10px;text-align:left;font-weight:600;color:#64748B;border-bottom:2px solid #E5E7EC}
-td{padding:7px 10px;border-bottom:1px solid #F1F5F9}
-tr:nth-child(even) td{background:#FAFAFA}
-.r-footer{text-align:center;margin-top:32px;padding-top:16px;border-top:1px solid #E5E7EC;font-size:11px;color:#94A3B8}
-.tip-banner{position:fixed;top:0;left:0;right:0;background:#00C896;color:#fff;text-align:center;padding:10px;font-size:14px;font-weight:600;z-index:10}
-.tip-banner a{color:#fff}</style></head><body>
-<div class="tip-banner">📸 请截屏或长按页面保存报告 &nbsp; <a href="javascript:history.back()">← 返回评估</a></div>
-<div class="wrap">${html}</div>
-</body></html>`;
-
-  const blob = new Blob([fullHtml], {type:'text/html;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  document.getElementById('reportOverlay').classList.remove('show');
-  window.location.href = url;
+function saveReportImage(){
+  // Mobile: just keep overlay open so user can scroll-screenshot
+  // This function is no longer needed; the overlay itself is the report view
 }
 
 function downloadReport(){
@@ -1377,10 +1340,9 @@ window.addEventListener('load', () => {
 <!-- Report Overlay -->
 <div class="report-overlay" id="reportOverlay">
   <div class="report-inner" id="reportInner"></div>
-  <div class="r-tip">💡 钉钉/微信内可长按图片保存，或点击下方按钮</div>
+  <div class="r-tip" id="rTip">💡 电脑端可点击下方按钮打印 PDF；移动端请滚动截屏或使用系统截图保存</div>
   <div class="r-actions">
-    <button class="r-btn r-btn-print" onclick="window.print()">🖨 打印 / 保存 PDF</button>
-    <button class="r-btn r-btn-print" onclick="saveReportImage()">📸 保存为图片</button>
+    <button class="r-btn r-btn-print" onclick="window.print()">🖨 打印 PDF 报告</button>
     <button class="r-btn r-btn-close" onclick="closeReport()">✕ 关闭</button>
   </div>
 </div>
