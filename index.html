@@ -206,6 +206,8 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Inter',-apple-syst
 .admin-empty{text-align:center;padding:60px 20px;color:var(--text-tertiary)}
 .admin-empty-icon{font-size:48px;margin-bottom:12px}
 .level-td{display:inline-block;padding:2px 10px;border-radius:100px;font-size:12px;font-weight:600}
+/* Shake animation for validation */
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
 /* === Report Overlay === */
 .report-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:9999;overflow-y:auto;display:none}
 .report-overlay.show{display:block}
@@ -690,7 +692,35 @@ function selectOption(qIdx, optIdx){
 
 function nextQuestion(qIdx){
   if(answers[qIdx] === -1){
-    alert('请先选择一个选项再继续。');
+    // Visual feedback: shake the option list
+    const slideId = 'slide-' + (qIdx + 2);
+    const slide = document.getElementById(slideId);
+    if(!slide) return;
+    const optionList = slide.querySelector('.option-list');
+    if(optionList){
+      optionList.style.animation = 'none';
+      optionList.offsetHeight; // reflow
+      optionList.style.animation = 'shake 0.5s ease';
+      optionList.style.border = '2px solid #EF4444';
+      optionList.style.borderRadius = '10px';
+      optionList.style.padding = '12px';
+      setTimeout(() => {
+        optionList.style.border = '';
+        optionList.style.padding = '';
+        optionList.style.animation = '';
+      }, 2000);
+    }
+    // Also show a temporary message above options
+    let msgEl = slide.querySelector('.q-validation-msg');
+    if(!msgEl){
+      msgEl = document.createElement('div');
+      msgEl.className = 'q-validation-msg';
+      msgEl.style.cssText = 'color:#EF4444;font-size:13px;font-weight:600;margin-bottom:8px;text-align:center';
+      const optList = slide.querySelector('.option-list');
+      if(optList) optList.parentNode.insertBefore(msgEl, optList);
+    }
+    msgEl.textContent = '⚠️ 请先选择一项答案后方可进入下一页';
+    setTimeout(() => { if(msgEl) msgEl.remove(); }, 2000);
     return;
   }
   if(qIdx === 18){
@@ -954,9 +984,14 @@ function closeReport(){
   document.getElementById('reportOverlay').classList.remove('show');
 }
 
-function saveReportImage(){
-  // Mobile: just keep overlay open so user can scroll-screenshot
-  // This function is no longer needed; the overlay itself is the report view
+function printReport(){
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768;
+  if(isMobile){
+    document.getElementById('rTip').innerHTML = '⚠️ 手机端不支持直接打印，请<b>滚动页面</b>后使用系统截屏保存';
+    document.getElementById('rTip').style.color = '#EF4444';
+  } else {
+    window.print();
+  }
 }
 
 function downloadReport(){
@@ -1342,7 +1377,7 @@ window.addEventListener('load', () => {
   <div class="report-inner" id="reportInner"></div>
   <div class="r-tip" id="rTip">💡 电脑端可点击下方按钮打印 PDF；移动端请滚动截屏或使用系统截图保存</div>
   <div class="r-actions">
-    <button class="r-btn r-btn-print" onclick="window.print()">🖨 打印 PDF 报告</button>
+    <button class="r-btn r-btn-print" onclick="printReport()">🖨 打印 PDF 报告</button>
     <button class="r-btn r-btn-close" onclick="closeReport()">✕ 关闭</button>
   </div>
 </div>
