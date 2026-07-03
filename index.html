@@ -206,6 +206,38 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Inter',-apple-syst
 .admin-empty{text-align:center;padding:60px 20px;color:var(--text-tertiary)}
 .admin-empty-icon{font-size:48px;margin-bottom:12px}
 .level-td{display:inline-block;padding:2px 10px;border-radius:100px;font-size:12px;font-weight:600}
+/* === Report Overlay === */
+.report-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:9999;overflow-y:auto;display:none}
+.report-overlay.show{display:block}
+.report-overlay .report-inner{max-width:800px;margin:0 auto;padding:24px 20px 100px;font-family:'PingFang SC','Microsoft YaHei',sans-serif;color:#1e293b}
+.report-overlay .r-header{text-align:center;border-bottom:3px solid #00C896;padding-bottom:20px;margin-bottom:24px}
+.report-overlay .r-header h1{font-size:22px;font-weight:700;color:#0F1729;margin-bottom:6px}
+.report-overlay .r-header .r-badge{display:inline-block;background:#E6FAF4;color:#00C896;padding:3px 12px;border-radius:100px;font-size:12px;font-weight:600}
+.report-overlay .r-section{margin-bottom:22px}
+.report-overlay .r-section h2{font-size:15px;font-weight:700;color:#0F1729;border-left:4px solid #00C896;padding-left:10px;margin-bottom:12px}
+.report-overlay .r-info{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;font-size:13px}
+.report-overlay .r-info .r-label{color:#64748B}
+.report-overlay .r-info .r-value{color:#0F1729;font-weight:500}
+.report-overlay .r-score-hero{display:flex;align-items:center;gap:20px;background:#F8FAFC;border-radius:10px;padding:20px 24px;margin-bottom:14px}
+.report-overlay .r-big{font-size:48px;font-weight:700;color:#00C896;line-height:1}
+.report-overlay .r-meta{font-size:14px;color:#64748B}
+.report-overlay .r-meta strong{color:#0F1729}
+.report-overlay .r-level{display:inline-block;padding:3px 12px;border-radius:100px;font-size:13px;font-weight:700}
+.report-overlay .r-bars{display:flex;flex-wrap:wrap;gap:10px}
+.report-overlay .r-bar{flex:1;min-width:130px;background:#F8FAFC;border-radius:8px;padding:12px 14px}
+.report-overlay .r-bar .r-bar-name{font-size:12px;font-weight:600;margin-bottom:4px}
+.report-overlay .r-bar .r-bar-val{font-size:20px;font-weight:700;color:#0F1729}
+.report-overlay table{width:100%;border-collapse:collapse;font-size:12px}
+.report-overlay th{background:#F8FAFC;padding:8px 10px;text-align:left;font-weight:600;color:#64748B;border-bottom:2px solid #E5E7EC}
+.report-overlay td{padding:7px 10px;border-bottom:1px solid #F1F5F9}
+.report-overlay tr:nth-child(even) td{background:#FAFAFA}
+.report-overlay .r-footer{text-align:center;margin-top:32px;padding-top:16px;border-top:1px solid #E5E7EC;font-size:11px;color:#94A3B8}
+.report-overlay .r-actions{position:fixed;bottom:0;left:0;width:100%;background:#fff;border-top:1px solid #E5E7EC;padding:12px 20px;display:flex;gap:12px;justify-content:center;z-index:10}
+.report-overlay .r-btn{padding:12px 24px;border-radius:50px;font-size:15px;font-weight:600;cursor:pointer;border:none}
+.report-overlay .r-btn-print{background:#00C896;color:#fff;box-shadow:0 4px 12px rgba(0,200,150,0.3)}
+.report-overlay .r-btn-close{background:#F1F5F9;color:#64748B}
+.report-overlay .r-tip{text-align:center;font-size:11px;color:#94A3B8;padding-bottom:8px}
+@media print{body>*{display:none!important}.report-overlay,.report-overlay.show{display:block!important;position:static;overflow:visible}.report-overlay .r-actions,.report-overlay .r-tip{display:none!important}}
 /* === Responsive === */
 @media(max-width:768px){
   html,body{overflow-y:auto;height:auto}
@@ -924,6 +956,10 @@ function loadFromStorage(){
   } catch(e) { /* corrupted data, ignore */ }
 }
 
+function closeReport(){
+  document.getElementById('reportOverlay').classList.remove('show');
+}
+
 function downloadReport(){
   const supplierId = document.getElementById('supplierId')?.value?.trim() || '未填写';
   const supplierName = document.getElementById('supplierName')?.value?.trim() || '未填写';
@@ -941,92 +977,32 @@ function downloadReport(){
     detailRows += `<tr><td>${q.num}</td><td>${q.title}</td><td>${q.cat}</td><td style="color:${lc};font-weight:600">${lvl}</td><td>${score === '-' ? '-' : score+'分'}</td></tr>`;
   });
 
-  const html = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>智能制造成熟度评估报告</title>
-<style>
-  @page { size: A4; margin: 20mm; }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'PingFang SC','Microsoft YaHei','Helvetica Neue',sans-serif; color: #1e293b; background: #fff; padding: 40px 48px; max-width: 800px; margin: 0 auto; }
-  .header { text-align: center; border-bottom: 3px solid #00C896; padding-bottom: 24px; margin-bottom: 32px; }
-  .header h1 { font-size: 26px; font-weight: 700; color: #0F1729; margin-bottom: 8px; }
-  .header .badge { display: inline-block; background: #E6FAF4; color: #00C896; padding: 4px 14px; border-radius: 100px; font-size: 13px; font-weight: 600; }
-  .section { margin-bottom: 28px; }
-  .section h2 { font-size: 16px; font-weight: 700; color: #0F1729; border-left: 4px solid #00C896; padding-left: 12px; margin-bottom: 14px; }
-  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; font-size: 14px; }
-  .info-grid .label { color: #64748B; }
-  .info-grid .value { color: #0F1729; font-weight: 500; }
-  .score-hero { display: flex; align-items: center; gap: 24px; background: #F8FAFC; border-radius: 12px; padding: 24px 32px; margin-bottom: 16px; }
-  .big-score { font-size: 56px; font-weight: 700; color: #00C896; line-height: 1; }
-  .score-meta { font-size: 16px; color: #64748B; }
-  .score-meta strong { color: #0F1729; }
-  .level-tag { display: inline-block; padding: 4px 14px; border-radius: 100px; font-size: 14px; font-weight: 700; }
-  .cat-bars { display: flex; flex-wrap: wrap; gap: 12px; }
-  .cat-bar { flex: 1; min-width: 150px; background: #F8FAFC; border-radius: 8px; padding: 14px 16px; }
-  .cat-bar .cat-name { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
-  .cat-bar .cat-val { font-size: 22px; font-weight: 700; color: #0F1729; }
-  .cat-bar .cat-sub { font-size: 12px; color: #64748B; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { background: #F8FAFC; padding: 10px 12px; text-align: left; font-weight: 600; color: #64748B; border-bottom: 2px solid #E5E7EC; }
-  td { padding: 9px 12px; border-bottom: 1px solid #F1F5F9; }
-  tr:nth-child(even) td { background: #FAFAFA; }
-  .footer { text-align: center; margin-top: 32px; padding-top: 16px; border-top: 1px solid #E5E7EC; font-size: 11px; color: #94A3B8; }
-  .print-btn { position: fixed; bottom: 20px; right: 20px; background: #00C896; color: white; border: none; padding: 14px 24px; border-radius: 50px; font-size: 15px; font-weight: 600; box-shadow: 0 4px 16px rgba(0,200,150,0.4); cursor: pointer; z-index: 100; }
-  @media print { body { padding: 0; } .print-btn { display: none; } }
-</style></head><body>
-<div class="header">
-  <h1>智能制造成熟度评估报告</h1>
-  <span class="badge">智造评估 · SmartMfg</span>
-</div>
-
-<div class="section">
-  <h2>供应商信息</h2>
-  <div class="info-grid">
-    <div><span class="label">供应商编号</span><br><span class="value">${supplierId}</span></div>
-    <div><span class="label">供应商全称</span><br><span class="value">${supplierName}</span></div>
-    <div><span class="label">合作大类</span><br><span class="value">${category}</span></div>
-    <div><span class="label">提交时间</span><br><span class="value">${submitTime}</span></div>
-  </div>
-</div>
-
-<div class="section">
-  <h2>综合评估结果</h2>
-  <div class="score-hero">
-    <div class="big-score">${r.total}</div>
-    <div class="score-meta">
-      <div><strong>/ 5.00</strong></div>
-      <div style="margin-top:4px">成熟度等级</div>
-      <span class="level-tag" style="background:${r.level.bg};color:${r.level.color}">${r.level.name}</span>
-    </div>
-  </div>
-  <div class="cat-bars">
-    ${['人员要素','技术要素','资源要素','制造要素'].map((n,i) => `
-      <div class="cat-bar">
-        <div class="cat-name" style="color:${['#00C896','#0EA5E9','#8B5CF6','#F59E0B'][i]}">${n} (${['15%','25%','20%','40%'][i]})</div>
-        <div class="cat-val">${r.avgs[i].toFixed(2)} <span style="font-size:13px;color:#64748B;font-weight:400">/ 5</span></div>
+  document.getElementById('reportInner').innerHTML = `
+    <div class="r-header"><h1>智能制造成熟度评估报告</h1><span class="r-badge">智造评估 · SmartMfg</span></div>
+    <div class="r-section"><h2>供应商信息</h2>
+      <div class="r-info">
+        <div><span class="r-label">供应商编号</span><br><span class="r-value">${supplierId}</span></div>
+        <div><span class="r-label">供应商全称</span><br><span class="r-value">${supplierName}</span></div>
+        <div><span class="r-label">合作大类</span><br><span class="r-value">${category}</span></div>
+        <div><span class="r-label">提交时间</span><br><span class="r-value">${submitTime}</span></div>
       </div>
-    `).join('')}
-  </div>
-</div>
-
-<div class="section">
-  <h2>逐项评分详情</h2>
-  <table>
-    <thead><tr><th>题号</th><th>指标</th><th>维度</th><th>评级</th><th>得分</th></tr></thead>
-    <tbody>${detailRows}</tbody>
-  </table>
-</div>
-
-<div class="footer">本报告由智造评估 · SmartMfg 自动生成 · ${new Date().toISOString().slice(0,10)}</div>
-<button class="print-btn" onclick="window.print()">🖨 打印 / 保存 PDF</button>
-</body></html>`;
-
-  const blob = new Blob([html], {type: 'text/html;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.target = '_blank';
-  a.rel = 'noopener';
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 3000);
+    </div>
+    <div class="r-section"><h2>综合评估结果</h2>
+      <div class="r-score-hero">
+        <div class="r-big">${r.total}</div>
+        <div class="r-meta"><div><strong>/ 5.00</strong></div><div style="margin-top:4px">成熟度等级</div><span class="r-level" style="background:${r.level.bg};color:${r.level.color}">${r.level.name}</span></div>
+      </div>
+      <div class="r-bars">
+        ${['人员要素','技术要素','资源要素','制造要素'].map((n,i) => `<div class="r-bar"><div class="r-bar-name" style="color:${['#00C896','#0EA5E9','#8B5CF6','#F59E0B'][i]}">${n} (${['15%','25%','20%','40%'][i]})</div><div class="r-bar-val">${r.avgs[i].toFixed(2)} <span class="r-bar-sub">/ 5</span></div></div>`).join('')}
+      </div>
+    </div>
+    <div class="r-section"><h2>逐项评分详情</h2>
+      <table><thead><tr><th>题号</th><th>指标</th><th>维度</th><th>评级</th><th>得分</th></tr></thead><tbody>${detailRows}</tbody></table>
+    </div>
+    <div class="r-footer">本报告由智造评估 · SmartMfg 自动生成 · ${new Date().toISOString().slice(0,10)}</div>
+  `;
+  document.getElementById('reportOverlay').classList.add('show');
+  document.getElementById('reportOverlay').scrollTop = 0;
 }
 
 // === Admin Slide ===
@@ -1402,5 +1378,14 @@ window.addEventListener('load', () => {
   rescale();
 });
 </script>
+<!-- Report Overlay -->
+<div class="report-overlay" id="reportOverlay">
+  <div class="report-inner" id="reportInner"></div>
+  <div class="r-tip">💡 微信内长按页面可截图保存</div>
+  <div class="r-actions">
+    <button class="r-btn r-btn-print" onclick="window.print()">🖨 打印 / 保存 PDF</button>
+    <button class="r-btn r-btn-close" onclick="closeReport()">✕ 关闭</button>
+  </div>
+</div>
 </body>
 </html>
