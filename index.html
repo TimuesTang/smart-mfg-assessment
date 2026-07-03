@@ -968,8 +968,9 @@ function downloadReport(){
   th { background: #F8FAFC; padding: 10px 12px; text-align: left; font-weight: 600; color: #64748B; border-bottom: 2px solid #E5E7EC; }
   td { padding: 9px 12px; border-bottom: 1px solid #F1F5F9; }
   tr:nth-child(even) td { background: #FAFAFA; }
-  .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #E5E7EC; font-size: 12px; color: #94A3B8; }
-  @media print { body { padding: 0; } }
+  .footer { text-align: center; margin-top: 32px; padding-top: 16px; border-top: 1px solid #E5E7EC; font-size: 11px; color: #94A3B8; }
+  .print-btn { position: fixed; bottom: 20px; right: 20px; background: #00C896; color: white; border: none; padding: 14px 24px; border-radius: 50px; font-size: 15px; font-weight: 600; box-shadow: 0 4px 16px rgba(0,200,150,0.4); cursor: pointer; z-index: 100; }
+  @media print { body { padding: 0; } .print-btn { display: none; } }
 </style></head><body>
 <div class="header">
   <h1>智能制造成熟度评估报告</h1>
@@ -1015,11 +1016,17 @@ function downloadReport(){
 </div>
 
 <div class="footer">本报告由智造评估 · SmartMfg 自动生成 · ${new Date().toISOString().slice(0,10)}</div>
-<script>window.onload=function(){window.print();}<`+`/script></body></html>`;
+<button class="print-btn" onclick="window.print()">🖨 打印 / 保存 PDF</button>
+</body></html>`;
 
-  const w = window.open('', '_blank');
-  w.document.write(html);
-  w.document.close();
+  const blob = new Blob([html], {type: 'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
 }
 
 // === Admin Slide ===
